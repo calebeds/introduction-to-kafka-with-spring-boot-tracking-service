@@ -21,6 +21,7 @@ import java.util.Map;
 @Configuration
 @ComponentScan(basePackages = { "dev.lydtech"})
 public class TrackingConfiguration {
+
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, DispatchPreparing> kafkaListenerContainerFactory(ConsumerFactory<String, DispatchPreparing> consumerFactory) {
         final ConcurrentKafkaListenerContainerFactory<String, DispatchPreparing> factory = new ConcurrentKafkaListenerContainerFactory<>();
@@ -29,13 +30,14 @@ public class TrackingConfiguration {
     }
 
     @Bean
-    public ConsumerFactory<String, DispatchPreparing> consumerFactory(@Value("localhost:9092") String bootstrapServers) {
+    public ConsumerFactory<String, DispatchPreparing> consumerFactory(@Value("${kafka.bootstrap-servers}") String bootstrapServers) {
         final Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
         config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, DispatchPreparing.class);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
@@ -45,7 +47,7 @@ public class TrackingConfiguration {
     }
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory(@Value("localhost:9092") String bootstrapServers) {
+    public ProducerFactory<String, Object> producerFactory(@Value("${kafka.bootstrap-servers}") String bootstrapServers) {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
